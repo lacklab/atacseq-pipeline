@@ -1,0 +1,14 @@
+configfile: "config/config.yaml"
+
+include: "rules/common.smk"
+include: "rules/qc.smk"
+include: "rules/sra.smk"
+include: "rules/map.smk"
+include: "rules/peak.smk"
+include: "rules/bw.smk"
+include: "rules/annot.smk"
+include: "rules/chipatlas.smk"
+
+rule all:
+    input:
+        outputs

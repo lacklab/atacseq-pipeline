@@ -1,0 +1,3 @@
+Name	Unit	Library	Fastq1	Fastq2	GSM
+LNCaP_ATAC	r1	Paired	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R1_1.fq.gz	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R1_2.fq.gz	-
+LNCaP_ATAC	r2	Paired	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R2_1.fq.gz	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R2_2.fq.gz	-
