@@ -220,7 +220,7 @@ if config["OUTPUT"]["RUN"]["PEAKS"]:
 # BigWig outputsI 
 if config["OUTPUT"]["RUN"]["BWS"]:
     outputs += [
-        f"results_{ref}/bigwig/{raw}.genomecov.{norm}.bw"
+        f"results_{ref}/bigwig/{raw}_{norm}.bw"
         for raw in samples["Name"]
         for norm in config["OUTPUT"]["BW_NORMALIZATIONS"]
     ]
