@@ -1,8 +1,8 @@
 rule generate_bigwig:
     input:
-        "results_{ref}/mapping/{raw}.filtered.bam"
+        "results_{ref}/mapping/{raw}.final.bam"
     output:
-        bigwig="results_{ref}/bigwig/{raw}.genomecov.{norm}.bw"
+        bigwig="results_{ref}/bigwig/{raw}_{norm}.bw"
     params:
         norm_method="{norm}",
         bin_size=50

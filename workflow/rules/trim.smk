@@ -18,5 +18,5 @@ rule trim_adapters:
             -j {threads} \
             -o {output.trimmed_fq1} \
             -p {output.trimmed_fq2} \
-            {input[0]} {input[1]} > {log} 2>&1
+            {input[0]} {input[1]}
         """

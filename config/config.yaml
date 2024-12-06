@@ -8,9 +8,9 @@ OUTPUT:
         BWS: True
         CHIPATLASBED: False
         CHIPATLASBIGWIG: False
-    BW_NORMALIZATIONS:
-        - rawcount
-        - FPM
+    BW_NORMALIZATIONS: # , BPM, RPGC, None
+        - RPKM
+        - CPM
     BAMPROCESS_PARAMS: -q 30
     MACS_THRESHOLD: 0.01
     IDR_THRESHOLD: 0.05

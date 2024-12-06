@@ -9,5 +9,6 @@ sra-data/
 raw-data/
 logs/
 qc/
+trimmed/
 
 slurm-*
