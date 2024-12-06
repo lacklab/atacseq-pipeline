@@ -1,0 +1,13 @@
+.snakemake
+*/.snakemake
+
+config/samples.tsv
+
+assets/experimentList.tab
+results_*/
+sra-data/
+raw-data/
+logs/
+qc/
+
+slurm-*

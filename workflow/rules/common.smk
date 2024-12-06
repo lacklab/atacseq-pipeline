@@ -26,6 +26,7 @@ if not os.path.exists(chip_atlas_file) or config["UPDATE_CHIPATLAS"]:
         "https://chip-atlas.dbcls.jp/data/metadata/experimentList.tab", chip_atlas_file
     )
 
+
 # Parse CHIP-Atlas experiment list
 with open(chip_atlas_file, "r") as f:
     for line in f:

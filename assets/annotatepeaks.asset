@@ -1,0 +1,10 @@
+# id: custom_bargraph_tsv
+# section_name: 'AnnotatePeaks.pl'
+# description: 'Peak annotations called by HOMER annotatePeaks.pl and a summary statistics plotted.'
+# format: 'tsv'
+# plot_type: 'bargraph'
+# pconfig:
+#    id: 'custom_bargraph_w_header'
+#    title: Peak Annotations
+#    ylab: 'Number of peaks'
+#    height: 100
