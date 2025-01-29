@@ -1,9 +1,10 @@
 SAMPLES: config/samples.tsv
 
 OUTPUT:
-    REF: hg38
+    REF: 
+        - hg38
     RUN:
-        QC: False
+        QC: True
         PEAKS: True
         BWS: True
         CHIPATLASBED: False
@@ -12,28 +13,8 @@ OUTPUT:
         - RPKM
         - CPM
     BAMPROCESS_PARAMS: -q 30
-    MACS_THRESHOLD: 0.01
-    IDR_THRESHOLD: 0.05
+    MACS_THRESHOLD: 
+        - 0.01
     CHIPATLASBED_THRESHOLD: '05'
 
-
-# Reference Genome Settings
-REFERENCES:
-    hg19:
-        FA: /groups/lackgrp/genomeAnnotations/hg19/hg19.fa
-        BWA_IDX: /groups/lackgrp/genomeAnnotations/hg19/hg19.bwa.idx
-        CHROM_SIZES: /groups/lackgrp/genomeAnnotations/hg19/hg19.chrom.sizes
-        BLACKLIST: /groups/lackgrp/genomeAnnotations/hg19/hg19-blacklist.v2.bed
-    hg38:
-        FA: /groups/lackgrp/genomeAnnotations/hg38/hg38.fa
-        BWA_IDX: /groups/lackgrp/genomeAnnotations/hg38/hg38.bwa.idx
-        CHROM_SIZES: /groups/lackgrp/genomeAnnotations/hg38/hg38.chrom.sizes
-        BLACKLIST: /groups/lackgrp/genomeAnnotations/hg38/hg38-blacklist.v2.bed
-
-CHIPATLAS: 
-    UPDATE: False  # Whether to update CHIP-Atlas experimentList.tab
-
-CUT_ADAPTERS:
-    ADAPTER_FWD: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA  # Illumina adapter R1
-    ADAPTER_REV: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT  # Illumina adapter R2
-    MIN_LENGTH: 20
+UPDATE_CHIPATLAS: False  # Whether to update CHIP-Atlas experimentList.tab

@@ -1,3 +1,7 @@
 Name	Unit	Library	Fastq1	Fastq2	GSM
-LNCaP_ATAC	r1	Paired	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R1_1.fq.gz	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R1_2.fq.gz	-
-LNCaP_ATAC	r2	Paired	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R2_1.fq.gz	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R2_2.fq.gz	-
+MGG152_NT	r1	Paired	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A1_R1_001.fastq.gz	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A1_R2_001.fastq.gz	-
+MGG152_NT	r2	Paired	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A2_R1_001.fastq.gz	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A2_R2_001.fastq.gz	-
+MGG152_NT	r3	Paired	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A3_R1_001.fastq.gz	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A3_R2_001.fastq.gz	-
+MGG152_KDMKO	r1	Paired	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A4_R1_001.fastq.gz	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A4_R2_001.fastq.gz	-
+MGG152_KDMKO	r2	Paired	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A5_R1_001.fastq.gz	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A5_R2_001.fastq.gz	-
+MGG152_KDMKO	r3	Paired	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A6_R1_001.fastq.gz	/groups/lackgrp/projects/col-cutandrun-tbo/rawdata/30-1110336138/00_fastq/A6_R2_001.fastq.gz	-
