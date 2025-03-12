@@ -4,6 +4,6 @@
 #SBATCH -p long,big-mem,normal,express
 
 source ~/.bashrc
-conda activate chipseq
+conda activate atacseq
 
 snakemake --profile profile/

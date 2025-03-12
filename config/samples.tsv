@@ -1,3 +1,5 @@
-Name	Unit	Library	Fastq1	Fastq2	GSM
-LNCaP_ATAC	r1	Paired	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R1_1.fq.gz	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R1_2.fq.gz	-
-LNCaP_ATAC	r2	Paired	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R2_1.fq.gz	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R2_2.fq.gz	-
+Name	Unit	Library	Fastq1	Fastq2	GSM	Genome
+LNCaP_ATAC	r1	Paired	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R1_1.fq.gz	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R1_2.fq.gz	-	hg38
+LNCaP_ATAC	r2	Paired	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R2_1.fq.gz	/groups/lackgrp/raw_data/LNCP/ATAC-seq/ATAC_16h_R2_2.fq.gz	-	hg38
+mES_v65	r1	Paired	SRR1930173	-	GSM1644021	mm39
+mES_v65	r2	Paired	SRR1930174	-	GSM1644021	mm39

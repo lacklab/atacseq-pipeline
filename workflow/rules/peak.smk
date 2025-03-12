@@ -3,18 +3,17 @@ rule macs2_call_peaks:
         "results_{ref}/mapping/{raw}.{p}.bam"
     output:
         narrowpeak="results_{ref}/peaks/{raw}_{p}_peaks.narrowPeak",
-        summits="results_{ref}/peaks/{raw}_{p}_peaks.summits.bed",
+        summits="results_{ref}/peaks/{raw}_{p}_summits.bed",
         xls="results_{ref}/peaks/{raw}_{p}_peaks.xls"
     params:
-        q=config["OUTPUT"]["MACS_THRESHOLD"],
-        outdir="results_{ref}/peaks"
+        q=config["OUTPUT"]["MACS_THRESHOLD"]
     threads: 16
     shell:
         """
         macs2 callpeak \
             -t {input} \
-            -n {params.outdir}/{wildcards.raw}_{wildcards.p} \
-            -g hs -q {params.q} --nomodel --shift -100 --extsize 200 --outdir {params.outdir}
+            -n results_{wildcards.ref}/peaks/{wildcards.raw}_{wildcards.p} \
+            -g hs -q {params.q} --nomodel --shift -100 --extsize 200
         """
 
 rule idr_analysis:

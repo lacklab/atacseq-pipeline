@@ -4,6 +4,10 @@ import os
 import pysam
 
 
+import yaml
+from pathlib import Path
+references = yaml.safe_load(Path("config/references.yaml").read_text())
+
 # Load sample metadata
 samples = pd.read_table(config["SAMPLES"])
 samples["Raw"] = samples["Name"] + "_" + samples["Unit"].astype(str)
@@ -38,7 +42,7 @@ with open(chip_atlas_file, "r") as f:
         assets["srx2gsm"][srx] = gsm
 
 # Reference genome
-ref = config["OUTPUT"]["REF"]
+#ref = config["OUTPUT"]["REF"]
 macs_threshold = config["OUTPUT"]["MACS_THRESHOLD"]
 
 # Utility functions
