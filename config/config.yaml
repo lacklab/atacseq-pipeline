@@ -1,9 +1,10 @@
 SAMPLES: config/samples.tsv
 
 OUTPUT:
-    REF: hg38
+    REF: 
+        - hg38
     RUN:
-        QC: False
+        QC: True
         PEAKS: True
         BWS: True
         CHIPATLASBED: False
@@ -12,14 +13,8 @@ OUTPUT:
         - RPKM
         - CPM
     BAMPROCESS_PARAMS: -q 30
-    MACS_THRESHOLD: 0.01
-    IDR_THRESHOLD: 0.05
+    MACS_THRESHOLD: 
+        - 0.01
     CHIPATLASBED_THRESHOLD: '05'
 
-CHIPATLAS: 
-    UPDATE: False  # Whether to update CHIP-Atlas experimentList.tab
-
-CUT_ADAPTERS:
-    ADAPTER_FWD: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA  # Illumina adapter R1
-    ADAPTER_REV: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT  # Illumina adapter R2
-    MIN_LENGTH: 20
+UPDATE_CHIPATLAS: False  # Whether to update CHIP-Atlas experimentList.tab

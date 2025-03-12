@@ -3,6 +3,10 @@ import urllib.request
 import os
 import pysam
 
+import yaml
+from pathlib import Path
+
+
 
 import yaml
 from pathlib import Path
@@ -11,6 +15,9 @@ references = yaml.safe_load(Path("config/references.yaml").read_text())
 # Load sample metadata
 samples = pd.read_table(config["SAMPLES"])
 samples["Raw"] = samples["Name"] + "_" + samples["Unit"].astype(str)
+
+references = yaml.safe_load(Path("config/references.yaml").read_text())
+
 
 # Asset initialization
 assets = {
@@ -25,7 +32,7 @@ with open("assets/annotatepeaks.asset", "r") as f:
 
 # Download or update CHIP-Atlas experiment list
 chip_atlas_file = "assets/experimentList.tab"
-if not os.path.exists(chip_atlas_file) or config["CHIPATLAS"]['UPDATE']:
+if not os.path.exists(chip_atlas_file) or config["UPDATE_CHIPATLAS"]:
     urllib.request.urlretrieve(
         "https://chip-atlas.dbcls.jp/data/metadata/experimentList.tab", chip_atlas_file
     )
@@ -43,160 +50,118 @@ with open(chip_atlas_file, "r") as f:
 
 # Reference genome
 #ref = config["OUTPUT"]["REF"]
-macs_threshold = config["OUTPUT"]["MACS_THRESHOLD"]
+#macs_threshold = config["OUTPUT"]["MACS_THRESHOLD"]
 
 # Utility functions
+def get_fastq(wildcards, fastq_col):
+    return samples.loc[samples["Raw"] == wildcards.raw, fastq_col].unique()[0]
+
+
 def get_lib(wildcards):
     return samples.loc[samples["Raw"] == wildcards.raw, "Library"].unique()[0]
 
 def get_units(wildcards):
-    return samples.loc[samples["Name"] == wildcards.raw, "Raw"].unique()
-
-def get_fq1(wildcards):
-    return samples.loc[samples["Raw"] == wildcards.raw, "Fastq1"].unique()[0]
-
-def get_fq2(wildcards):
-    return samples.loc[samples["Raw"] == wildcards.raw, "Fastq2"].unique()[0]
+    return expand("results_{{ref}}/mapping/{rep}.filtered.bam", rep=samples.loc[samples["Name"] == wildcards.name, "Raw"].unique()) 
 
 
-def get_fqs(wildcards):
-    fq1 = get_fq1(wildcards)
-    fq2 = get_fq2(wildcards)
-    
-    # If FASTQ files are not specified, use SRR data
-    if  "SRR" in fq1:
-        srr = samples.loc[samples["Raw"] == wildcards.raw, "SRR"].unique()[0]
-        return f"sra-data/{srr}_1.fastq.gz", f"sra-data/{srr}_2.fastq.gz"
-    return fq1, fq2
+def get_group_deeptools(wildcards):
+    return expand("results_{{ref}}/mapping/{name}.filtered.bam", name=samples["Raw"].tolist())
 
-def get_filter_p(wildcards):
+
+
+
+# map.smk functions
+def get_bwa(wildcards):
     lib = get_lib(wildcards)
-    return "-F 3852 -f 2" if lib == "Paired" else "-F 3852"
+    if lib == 'Single':
+        return f"trimmed/{wildcards.raw}_1.trimmed.fastq.gz"
+    elif lib == 'Paired':
+        return (f"trimmed/{wildcards.raw}_1.trimmed.fastq.gz", f"trimmed/{wildcards.raw}_2.trimmed.fastq.gz")
+    fq1 = get_fastq(wildcards, "Fastq1")
+    
+def get_fqs(wildcards):
+    fq1 = get_fastq(wildcards, "Fastq1")
+    lib = get_lib(wildcards)
+    if "SRR" in fq1:
+        return (f"{os.getcwd()}/sra-data/{fq1}_1.fastq.gz", f"{os.getcwd()}/sra-data/{fq1}_2.fastq.gz") if lib == "Paired" else f"{os.getcwd()}/sra-data/{fq1}_1.fastq.gz"
+    fq2 = get_fastq(wildcards, "Fastq2")
+    return (fq1, fq2) if lib == "Paired" else fq1
 
-def get_reps(wildcards):
-    return expand(f"results_{ref}/mapping/{{rep}}.filtered.bam", rep=get_units(wildcards))
 
-# QC-related functions
-# Mapping FASTQ files for FASTQC
-def create_fastqc_map(samples):
-    """
-    Create a mapping of FASTQ files for FASTQC based on the sample information.
-    """
-    fastqc_map = {}
-    for fastq in samples["Fastq1"].tolist() + samples["Fastq2"].tolist():
-        if "gz" in fastq or "zip" in fastq:
-            key = fastq.rsplit(".", 2)[0].split("/")[-1]
-            fastqc_map[key] = fastq
-        elif "SRR" in fastq:
-            fastqc_map[f"{fastq}_1"] = f"sra-data/{fastq}_1.fastq.gz"
-            fastqc_map[f"{fastq}_2"] = f"sra-data/{fastq}_2.fastq.gz"
-        elif fastq != "-":
-            key = fastq.rsplit(".", 1)[0].split("/")[-1]
-            fastqc_map[key] = fastq
-    return fastqc_map
 
-# Function to get FASTQC paths
-def get_fastqc(wildcards):
-    return fastqc_map[wildcards.raw]
+##########################
 
-# Function to get annotate peaks files
-def get_annotatepeaks(wildcards):
-    """
-    Generate paths for annotatePeaks output files.
-    """
-    return expand(
-        [f"qc/{ref}:{row['Name']}.annotatePeaks.txt" for _, row in samples.iterrows()]
-    )
 
-# Function to get BAM files for FRiP
-def get_frip_b(wildcards):
-    """
-    Generate paths for final BAM files used in FRiP calculations.
-    """
-    return expand(
-        [f"results_{ref}/mapping/{row['Name']}.final.bam" for _, row in samples.iterrows()]
-    )
-
-# Function to get peak files for FRiP
-def get_frip_p(wildcards):
-    """
-    Generate paths for narrowPeak files used in FRiP calculations.
-    """
-    return expand(
-        [f"results_{ref}/peaks/{row['Name']}_{q}_peaks.narrowPeak" for _, row in samples.iterrows()]
-    )
 
 # Function to collect outputs for MultiQC
 def get_multiqc(wildcards):
-    """
-    Generate a list of all files required for MultiQC analysis.
-    """
-    output_files = []
-    for _, row in samples.iterrows():
-        lib = row["Library"]
-        fq1 = row["Fastq1"].split("/")[-1]
-        fq2 = row["Fastq2"].split("/")[-1]
-
-        # Adjust file extensions for SRR and compressed files
-        if "SRR" in fq1:
-            ext1, ext2 = "_1", "_2"
-            fq2 = fq1
-        else:
-            ext1, ext2 = "", ""
-        if "gz" in fq1:
-            fq1 = fq1.rsplit(".", 2)[0]
-            fq2 = fq2.rsplit(".", 2)[0]
-
-        # Add FASTQC outputs
-        if lib == "Single":
-            output_files.append(f"qc/fastqc/{fq1 + ext1}_fastqc.zip")
-        elif lib == "Paired":
-            output_files.extend([
-                f"qc/fastqc/{fq1 + ext1}_fastqc.zip",
-                f"qc/fastqc/{fq2 + ext2}_fastqc.zip"
-            ])
-
-        # Add flagstats and stats outputs
-        output_files.extend([
-            f"qc/flagstats/{ref}:{row['Raw']}.raw",
-            f"qc/flagstats/{ref}:{row['Name']}.final",
-            f"qc/stats/{ref}:{row['Name']}.final"
-        ])
-
-    # Add additional QC outputs
-    for _, row in samples.iterrows():
-        output_files.extend([
-            f"qc/annot/{ref}:{row['Name']}_{q}.summary_mqc.txt",
-            f"qc/macs/{ref}:{row['Name']}_{q}_peaks.xls"
-        ])
-
-    # Add FRiP QC summary
-    output_files.append("qc/frip_mqc.tsv")
-    return expand(output_files)
-	
-# Peak-calling functions
-def get_macs_p(wildcards):
-    lib = get_lib(wildcards)
-    control = get_control(wildcards)
-    param = f"-t results_{wildcards.ref}/mapping/{wildcards.raw}.{wildcards.p}.bam "
-    if control != "-":
-        param += f"-c results_{wildcards.ref}/mapping/{control}.final.bam "
-    param += "-f BAMPE" if lib == "Paired" else "-f BAM"
-    return param
-
-def get_macs_i(wildcards):
-    control = get_control(wildcards)
-    inputs = [f"results_{wildcards.ref}/mapping/{wildcards.raw}.{wildcards.p}.bam"]
-    if control != "-":
-        inputs.append(f"results_{wildcards.ref}/mapping/{control}.final.bam")
-    return inputs
-
-def get_idr_i(wildcards):
-    return {
-        "pr1": f"results_{wildcards.ref}/peaks/{wildcards.raw}_pr1_{macs_threshold}_peaks.narrowPeak",
-        "pr2": f"results_{wildcards.ref}/peaks/{wildcards.raw}_pr2_{macs_threshold}_peaks.narrowPeak",
-        "final": f"results_{wildcards.ref}/peaks/{wildcards.raw}_final_{macs_threshold}_peaks.narrowPeak",
+    out = []
+    
+    # List of common quality control file types and tools
+    qc_tools_1 = {
+        "fastqc": [
+            "{raw}_1_fastqc.html", 
+            "{raw}_2_fastqc.html"
+        ],
+        "trimgalore": [
+            "{raw}_1.fastq.gz_trimming_report.txt",
+            "{raw}_2.fastq.gz_trimming_report.txt",
+            "{raw}_1.trimmed_fastqc.html",
+            "{raw}_2.trimmed_fastqc.html"
+        ],
+        "samtools": [
+            "flagstat/{ref}:{raw}.coorsorted.flagstat",
+            "idxstats/{ref}:{raw}.coorsorted.idxstats",
+            "stats/{ref}:{raw}.coorsorted.stats"
+        ],
+        "bwa": [
+            "{ref}:{raw}.bwa.log"
+        ],
+        "deeptools": [
+            "{ref}:all_bam.bamSummary.npz",
+            "{ref}:all_bam.plotCorrelation.mat.tab",
+            "{ref}:all_bam.plotFingerprint.qcmetrics.txt",
+            "{ref}:all_bam.plotFingerprint.raw.txt",
+            "{ref}:all_bam.plotPCA.tab"
+        ]
     }
+    qc_tools_2 = {
+         "samtools": [
+            "flagstat/{ref}:{name}.final.flagstat",
+            "idxstats/{ref}:{name}.final.idxstats",
+            "stats/{ref}:{name}.final.stats"
+        ],
+        "macs": [
+            "{ref}:{name}_{q}_peaks.xls"
+        ],
+        "homer":
+        [
+            "{ref}:{name}_{q}_summary_mqc.txt"
+        ] # TODO: duplications
+    }
+    # Iterate through each sample and append all files based on the defined templates
+    for ref in config['OUTPUT']['REF']:
+        for q in config['OUTPUT']['MACS_THRESHOLD']:
+            for _, row in samples.iterrows():
+                raw = row['Raw']
+                name = row['Name']
+
+                
+                # Generate output paths for each tool and file pattern
+                for tool, patterns in qc_tools_1.items():
+                    for pattern in patterns:
+                        out.append(f"qc/{tool}/{pattern.format(raw=raw, ref=ref, q=q)}")
+
+                for tool, patterns in qc_tools_2.items():
+                    for pattern in patterns:
+                        out.append(f"qc/{tool}/{pattern.format(name=name, ref=ref, q=q)}")
+   
+    # Add FRIP score file (outside the loop as a single file)
+        out.append(f"qc/{ref}:frip_mqc.tsv")
+
+    return expand(out)
+
+
 
 # CHIP-Atlas functions
 def get_cabeds(wildcards):
@@ -206,6 +171,10 @@ def get_cabeds(wildcards):
 def get_cabws(wildcards):
     srx = assets["gsm2srx"][wildcards.gsm]
     return f"results_{wildcards.ref}/cabws/srx/{srx}.bw"
+
+
+
+
 
 # Output list
 outputs = []
@@ -217,14 +186,17 @@ if config["OUTPUT"]["RUN"]["QC"]:
 # Peak calling outputs
 if config["OUTPUT"]["RUN"]["PEAKS"]:
     outputs += [
-        f"results_{ref}/idr/{raw}_idr.narrowPeak"
+        f"results_{ref}/peaks/{raw}_{q}_peaks.narrowPeak"
+        for ref in config['OUTPUT']['REF']
+        for q in config['OUTPUT']['MACS_THRESHOLD']
         for raw in samples["Name"]
-    ]
 
+    ]
 # BigWig outputsI 
 if config["OUTPUT"]["RUN"]["BWS"]:
     outputs += [
-        f"results_{ref}/bigwig/{raw}_{norm}.bw"
+        f"results_{ref}/bigwig/{raw}.bamCoverage.{norm}.bw"
+        for ref in config['OUTPUT']['REF']
         for raw in samples["Name"]
         for norm in config["OUTPUT"]["BW_NORMALIZATIONS"]
     ]
