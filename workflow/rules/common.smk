@@ -1,7 +1,6 @@
 import pandas as pd
 import urllib.request
 import os
-import pysam
 
 import yaml
 from pathlib import Path

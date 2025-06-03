@@ -7,7 +7,10 @@ rule map_bwa:
 
     params:
         idx=lambda wildcards: references[wildcards.ref]["BWA_IDX"]
-    threads: 32
+    threads: 
+        32
+    conda:
+        "../envs/atac.yaml"
     shell:
         """
         bwa mem -t {threads} {params.idx} {input} 2> {output.log} \
@@ -26,6 +29,8 @@ rule bam_process:
         config["OUTPUT"]["BAMPROCESS_PARAMS"]  # Parameters for BAM processing
     threads:
         16
+    conda:
+        "../envs/atac.yaml"
     shell:
         """
         samtools view -h {params} {input} \
@@ -41,6 +46,8 @@ rule bam_filter:
     output:
         temp("results_{ref}/mapping/{raw}.filtered.bam")
     threads: 32
+    conda:
+        "../envs/atac.yaml"
     params:
         fa = lambda wildcards: references[wildcards.ref]["FA"],
         bl = lambda wildcards: references[wildcards.ref]["BLACKLIST"],
@@ -54,24 +61,29 @@ rule bam_filter:
         samtools index {output}
         """
 
+##############################################################################
+# Merge technical replicates (or move a single BAM)
+##############################################################################
 rule bam_merge:
     input:
-        get_units  # Collect replicates
+        get_units          # list of replicate BAMs
     output:
         "results_{ref}/mapping/{name}.final.bam"
     threads: 32
-    run:
-        if len(input) > 1:
-            shell("""
-                samtools merge -@ {threads} -o {output} {input}
-                samtools index {output}
-            """)
-        else:
-            shell("""
-                mv {input[0]} {output}
-                samtools index {output}
-            """)
-
+    conda: "../envs/atac.yaml"
+    shell:
+        r"""
+        set -euo pipefail
+        bam_out={output}
+        if [ $(echo {input} | wc -w) -gt 1 ]; then
+            # Multiple replicates → merge
+            samtools merge -@ {threads} -o $bam_out {input}
+        else
+            # Single replicate → just rename
+            mv {input} $bam_out
+        fi
+        samtools index $bam_out
+        """
 #rule pseudoreps:
 #    input:
 #        "results_{ref}/mapping/{raw}.final.bam"

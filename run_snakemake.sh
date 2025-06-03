@@ -1,9 +1,3 @@
 #!/bin/bash
-#SBATCH -c 64
-#SBATCH --mem 720GB
-#SBATCH -p long,big-mem,normal,express
 
-source ~/.bashrc
-conda activate atacseq
-
-snakemake -n --profile profile/
+snakemake --profile /groups/lackgrp/snakemake7-profile/ --use-conda --conda-frontend conda

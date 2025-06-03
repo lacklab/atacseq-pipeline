@@ -8,6 +8,7 @@ rule plot_fingerprint:
 		qcmetrics="qc/deeptools/{ref}:all_bam.plotFingerprint.qcmetrics.txt"
 	threads:
 		64
+	conda: "../envs/atac.yaml"
 	shell:
 		"""	
 		plotFingerprint \
@@ -32,6 +33,7 @@ rule plot_multibam:
 		tab_corr="qc/deeptools/{ref}:all_bam.plotCorrelation.mat.tab"
 	threads:
 		64
+	conda: "../envs/atac.yaml"
 	shell:
 		"""	
 		multiBamSummary bins \

@@ -5,6 +5,8 @@ rule generate_bigwig:
         bigwig="results_{ref}/bigwig/{raw}.bamCoverage.{norm}.bw"
     threads: 
         8
+    conda:
+        "../envs/atac.yaml"
     shell:
         """
         bamCoverage -b {input} -o {output} \

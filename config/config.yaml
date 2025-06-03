@@ -4,7 +4,7 @@ OUTPUT:
     REF: 
         - hg38
     RUN:
-        QC: True
+        QC: False
         PEAKS: True
         BWS: True
         CHIPATLASBED: False

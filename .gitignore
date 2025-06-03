@@ -12,4 +12,4 @@ qc/
 link/
 trimmed/
 
-slurm-*
+slurm*
