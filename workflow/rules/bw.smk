@@ -4,12 +4,12 @@ rule generate_bigwig:
     output:
         bigwig="results_{ref}/bigwig/{raw}.bamCoverage.{norm}.bw"
     threads: 
-        8
+        32
     conda:
         "../envs/atac.yaml"
     shell:
         """
-        bamCoverage -b {input} -o {output} \
+        bamCoverage -p 32 -b {input} -o {output} \
         --binSize 50 \
         --normalizeUsing {wildcards.norm} \
         --extendReads --centerReads
