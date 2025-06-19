@@ -1,0 +1,8 @@
+name: chipseq_sra
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - sra-tools
+  - parallel-fastq-dump

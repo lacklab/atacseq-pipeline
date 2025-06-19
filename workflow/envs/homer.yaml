@@ -1,0 +1,7 @@
+name: chipseq_homer
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - homer

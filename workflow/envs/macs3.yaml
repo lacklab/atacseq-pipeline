@@ -1,0 +1,7 @@
+name: chipseq_macs3
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - macs3

@@ -1,0 +1,11 @@
+name: chipseq_bedtools
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bedtools
+  - samtools=1.20
+  - ucsc-bedgraphtobigwig
+  - python
+  - pysam

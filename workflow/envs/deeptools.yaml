@@ -1,0 +1,7 @@
+name: chipseq_deeptools
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - deeptools
