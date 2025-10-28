@@ -39,7 +39,7 @@ rule trim_adapters:
         t1report    = "qc/trimgalore/{raw}_1.fastq.gz_trimming_report.txt",
         t2report    = "qc/trimgalore/{raw}_2.fastq.gz_trimming_report.txt"
     threads: 8
-    conda: "../envs/atac.yaml"
+    conda: "../envs/trim.yaml"
     params:
         lib = lambda wc: get_lib(wc)          # returns "Single" or "Paired"
     shell:

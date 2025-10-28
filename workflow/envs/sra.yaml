@@ -1,4 +1,4 @@
-name: chipseq_sra
+name: atacseq_sra
 channels:
   - conda-forge
   - bioconda

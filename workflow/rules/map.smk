@@ -1,24 +1,48 @@
+#rule map_bwa:
+#    input:
+#        get_bwa
+#    output:
+#        raw=temp("results_{ref}/mapping/{raw}.raw.bam"),
+#        log="qc/bwa/{ref}:{raw}.bwa.log"
+#
+#    params:
+#        idx=lambda wildcards: references[wildcards.ref]["BWA_IDX"]
+#    threads: 
+#        32
+#    conda:
+#        "../envs/atac.yaml"
+#    shell:
+#        """
+#        bwa mem -t {threads} {params.idx} {input} 2> {output.log} \
+#        | samtools view -bS - > {output.raw}
+#        """
+
+
+
 rule map_bwa:
     input:
-        get_bwa
+        trimmed_fq1="trimmed/{raw}_1.trimmed.fastq.gz",
+        trimmed_fq2="trimmed/{raw}_2.trimmed.fastq.gz"
     output:
-        raw=temp("results_{ref}/mapping/{raw}.raw.bam"),
+        raw=temp("results_{ref}/mapping/{raw}.raw.bam"),  # Temporary raw BAM file
         log="qc/bwa/{ref}:{raw}.bwa.log"
-
     params:
-        idx=lambda wildcards: references[wildcards.ref]["BWA_IDX"]
-    threads: 
-        32
+        idx=lambda wildcards: references[wildcards.ref]["BWA_IDX"],
+        lib=lambda wildcards: get_lib(wildcards)
+    threads:
+        16  # Number of threads to use
     conda:
-        "../envs/atac.yaml"
+        "../envs/bwa.yaml"
     shell:
         """
-        bwa mem -t {threads} {params.idx} {input} 2> {output.log} \
-        | samtools view -bS - > {output.raw}
+        if [[ "{params.lib}" == "Single" ]]; then
+            bwa mem -t {threads} {params.idx} {input.trimmed_fq1} 2> {output.log} \
+            | samtools view -bS - > {output.raw}
+        elif [[ "{params.lib}" == "Paired" ]]; then
+            bwa mem -t {threads} {params.idx} {input} 2> {output.log} \
+            | samtools view -bS - > {output.raw}
+        fi
         """
-
-
-
     # Rule: Process BAM file (coordinate sorting, fixing mates, marking duplicates)
 rule bam_process:
     input:
@@ -30,7 +54,7 @@ rule bam_process:
     threads:
         16
     conda:
-        "../envs/atac.yaml"
+        "../envs/bwa.yaml"
     shell:
         """
         samtools view -h {params} {input} \
@@ -47,7 +71,7 @@ rule bam_filter:
         temp("results_{ref}/mapping/{raw}.filtered.bam")
     threads: 32
     conda:
-        "../envs/atac.yaml"
+        "../envs/bedtools.yaml"
     params:
         fa = lambda wildcards: references[wildcards.ref]["FA"],
         bl = lambda wildcards: references[wildcards.ref]["BLACKLIST"],
@@ -64,25 +88,45 @@ rule bam_filter:
 ##############################################################################
 # Merge technical replicates (or move a single BAM)
 ##############################################################################
+#rule bam_merge:
+#    input:
+#        get_units          # list of replicate BAMs
+#    output:
+#        "results_{ref}/mapping/{name}.final.bam"
+#    threads: 32
+#    conda: "../envs/bwa.yaml"
+#    shell:
+#        r"""
+#        set -euo pipefail
+#        bam_out={output}
+#        if [ $(echo {input} | wc -w) -gt 1 ]; then
+#            # Multiple replicates → merge
+#            samtools merge -@ {threads} -o $bam_out {input}
+#        else
+#            # Single replicate → just rename
+#            mv {input} $bam_out
+#        fi
+#        samtools index $bam_out
+#        """
+#
+
 rule bam_merge:
     input:
-        get_units          # list of replicate BAMs
+        get_units
     output:
-        "results_{ref}/mapping/{name}.final.bam"
-    threads: 32
-    conda: "../envs/atac.yaml"
+        "results_{ref}/mapping/{name}.final.bam"  # Final merged BAM file
+    threads:
+        16
+    conda:
+        "../envs/bwa.yaml"
     shell:
-        r"""
-        set -euo pipefail
-        bam_out={output}
-        if [ $(echo {input} | wc -w) -gt 1 ]; then
-            # Multiple replicates → merge
-            samtools merge -@ {threads} -o $bam_out {input}
+        """
+        if [[ $(echo {input} | grep ' ') ]]; then
+            samtools merge -@ {threads} -o {output} {input}
         else
-            # Single replicate → just rename
-            mv {input} $bam_out
+            mv {input} {output}
         fi
-        samtools index $bam_out
+        samtools index {output}
         """
 #rule pseudoreps:
 #    input:

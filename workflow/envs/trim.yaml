@@ -1,4 +1,4 @@
-name: chipseq_trim
+name: atacseq_trim
 channels:
   - conda-forge
   - bioconda
