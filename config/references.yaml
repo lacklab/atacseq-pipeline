@@ -8,3 +8,10 @@ hg38:
     BWA_IDX: /groups/lackgrp/genomeAnnotations/hg38/hg38.bwa.idx
     CHROM_SIZES: /groups/lackgrp/genomeAnnotations/hg38/hg38.chrom.sizes
     BLACKLIST: /groups/lackgrp/genomeAnnotations/hg38/hg38-blacklist.v2.bed
+mm39:
+    GENOME: /groups/lackgrp/genomeAnnotations/animals/mm39/
+    FA: /groups/lackgrp/genomeAnnotations/animals/mm39/mm39.fa
+    BWA_IDX: /groups/lackgrp/genomeAnnotations/animals/mm39/mm39.bwa.idx
+    BOWTIE2_IDX: /groups/lackgrp/genomeAnnotations/animals/mm39/mm39.bowtie2.idx
+    CHROM_SIZES: /groups/lackgrp/genomeAnnotations/animals/mm39/mm39_chr.chrom.sizes
+    BLACKLIST: /groups/lackgrp/genomeAnnotations/animals/mm39/mm39.excluderanges.bed

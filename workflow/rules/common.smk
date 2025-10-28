@@ -13,7 +13,7 @@ references = yaml.safe_load(Path("config/references.yaml").read_text())
 
 # Load sample metadata
 samples = pd.read_table(config["SAMPLES"])
-samples["Raw"] = samples["Name"] + "_" + samples["Unit"].astype(str)
+samples["Raw"] = samples["Name"] + "." + samples["Unit"].astype(str)
 
 references = yaml.safe_load(Path("config/references.yaml").read_text())
 
@@ -82,7 +82,7 @@ def get_fqs(wildcards):
     fq1 = get_fastq(wildcards, "Fastq1")
     lib = get_lib(wildcards)
     if "SRR" in fq1:
-        return (f"{os.getcwd()}/sra-data/{fq1}_1.fastq.gz", f"{os.getcwd()}/sra-data/{fq1}_2.fastq.gz") if lib == "Paired" else f"{os.getcwd()}/sra-data/{fq1}_1.fastq.gz"
+        return (f"sra-data/{fq1}_1.fastq.gz", f"sra-data/{fq1}_2.fastq.gz") if lib == "Paired" else f"sra-data/{fq1}_1.fastq.gz"
     fq2 = get_fastq(wildcards, "Fastq2")
     return (fq1, fq2) if lib == "Paired" else fq1
 
@@ -139,21 +139,22 @@ def get_multiqc(wildcards):
         ] # TODO: duplications
     }
     # Iterate through each sample and append all files based on the defined templates
-    for ref in config['OUTPUT']['REF']:
+    for _, row in samples.iterrows():
         for q in config['OUTPUT']['MACS_THRESHOLD']:
-            for _, row in samples.iterrows():
-                raw = row['Raw']
-                name = row['Name']
+            ref = row['Genome']
+            
+            raw = row['Raw']
+            name = row['Name']
 
-                
-                # Generate output paths for each tool and file pattern
-                for tool, patterns in qc_tools_1.items():
-                    for pattern in patterns:
-                        out.append(f"qc/{tool}/{pattern.format(raw=raw, ref=ref, q=q)}")
+            
+            # Generate output paths for each tool and file pattern
+            for tool, patterns in qc_tools_1.items():
+                for pattern in patterns:
+                    out.append(f"qc/{tool}/{pattern.format(raw=raw, ref=ref, q=q)}")
 
-                for tool, patterns in qc_tools_2.items():
-                    for pattern in patterns:
-                        out.append(f"qc/{tool}/{pattern.format(name=name, ref=ref, q=q)}")
+            for tool, patterns in qc_tools_2.items():
+                for pattern in patterns:
+                    out.append(f"qc/{tool}/{pattern.format(name=name, ref=ref, q=q)}")
    
     # Add FRIP score file (outside the loop as a single file)
         out.append(f"qc/{ref}:frip_mqc.tsv")
@@ -185,17 +186,15 @@ if config["OUTPUT"]["RUN"]["QC"]:
 # Peak calling outputs
 if config["OUTPUT"]["RUN"]["PEAKS"]:
     outputs += [
-        f"results_{ref}/peaks/{raw}_{q}_peaks.narrowPeak"
-        for ref in config['OUTPUT']['REF']
+        f"results_{row['Genome']}/peaks/{row['Name']}_{q}_peaks.narrowPeak"
+        for i, row in samples.iterrows()
         for q in config['OUTPUT']['MACS_THRESHOLD']
-        for raw in samples["Name"]
-
     ]
+
 # BigWig outputsI 
 if config["OUTPUT"]["RUN"]["BWS"]:
     outputs += [
-        f"results_{ref}/bigwig/{raw}.bamCoverage.{norm}.bw"
-        for ref in config['OUTPUT']['REF']
-        for raw in samples["Name"]
+        f"results_{row['Genome']}/bigwig/{row['Name']}.bamCoverage.{norm}.bw"
+        for i, row in samples.iterrows()
         for norm in config["OUTPUT"]["BW_NORMALIZATIONS"]
     ]

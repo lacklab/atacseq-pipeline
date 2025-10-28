@@ -2,6 +2,7 @@
 */.snakemake
 
 config/samples.tsv
+config/samples_issued.tsv
 
 assets/experimentList.tab
 results_*/
